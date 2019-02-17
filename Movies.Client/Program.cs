@@ -50,6 +50,38 @@ namespace Movies.Client
 
             serviceCollection.AddLogging();
 
+            serviceCollection.AddHttpClient("MoviesClient", client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:57863");
+                client.Timeout = new TimeSpan(0, 0, 30);
+                client.DefaultRequestHeaders.Clear();
+            })
+            .ConfigurePrimaryHttpMessageHandler(handler =>
+            new HttpClientHandler()
+            {
+                AutomaticDecompression = System.Net.DecompressionMethods.GZip
+            });
+
+            //serviceCollection.AddHttpClient<MoviesClient>(client =>
+            //{
+            //    client.BaseAddress = new Uri("http://localhost:57863");
+            //    client.Timeout = new TimeSpan(0, 0, 30);
+            //    client.DefaultRequestHeaders.Clear();
+            //}
+            //).ConfigurePrimaryHttpMessageHandler(handler =>
+            //new HttpClientHandler()
+            //{
+            //    AutomaticDecompression = System.Net.DecompressionMethods.GZip
+            //});
+
+            serviceCollection.AddHttpClient<MoviesClient>()
+                .ConfigurePrimaryHttpMessageHandler(handler =>
+                   new HttpClientHandler()
+                   {
+                       AutomaticDecompression = System.Net.DecompressionMethods.GZip
+                   });
+
+
             // register the integration service on our container with a 
             // scoped lifetime
 
@@ -63,10 +95,10 @@ namespace Movies.Client
             // serviceCollection.AddScoped<IIntegrationService, StreamService>();
 
             // For the cancellation demos
-            serviceCollection.AddScoped<IIntegrationService, CancellationService>();
+            // serviceCollection.AddScoped<IIntegrationService, CancellationService>();
 
             // For the HttpClientFactory demos
-            // serviceCollection.AddScoped<IIntegrationService, HttpClientFactoryInstanceManagementService>();
+            serviceCollection.AddScoped<IIntegrationService, HttpClientFactoryInstanceManagementService>();
 
             // For the dealing with errors and faults demos
             // serviceCollection.AddScoped<IIntegrationService, DealingWithErrorsAndFaultsService>();
