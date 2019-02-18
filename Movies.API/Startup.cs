@@ -57,13 +57,10 @@
             // it's better to store the connection string in an environment variable)
             string connectionString = Configuration["ConnectionStrings:MoviesDBConnectionString"];
             services.AddDbContext<MoviesContext>(o => o.UseSqlServer(connectionString));
-
             services.AddScoped<IMoviesRepository, MoviesRepository>();
             services.AddScoped<IPostersRepository, PostersRepository>();
             services.AddScoped<ITrailersRepository, TrailersRepository>();
-
             services.AddAutoMapper();
-
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "Movies API", Version = "v1" });

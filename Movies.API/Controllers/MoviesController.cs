@@ -44,9 +44,9 @@
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Models.Movie>>> GetMovies()
         {
-            var movieEntities = await this.moviesRepository.GetMoviesAsync();
+            IEnumerable<Movie> movieEntities = await this.moviesRepository.GetMoviesAsync();
 
-            return Ok(this.mapper.Map<IEnumerable<Models.Movie>>(movieEntities));
+            return this.Ok(this.mapper.Map<IEnumerable<Models.Movie>>(movieEntities));
         }
 
         /// <summary>
@@ -60,9 +60,9 @@
             Movie movieEntity = await this.moviesRepository.GetMovieAsync(movieId);
 
             if (movieEntity == null)
-                return NotFound();
+                return this.NotFound();
 
-            return Ok(this.mapper.Map<Models.Movie>(movieEntity));
+            return this.Ok(this.mapper.Map<Models.Movie>(movieEntity));
         }
 
         /// <summary>
@@ -75,11 +75,11 @@
         {
             // model validation
             if (movieForCreation == null)
-                return BadRequest();
+                return this.BadRequest();
 
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
                 // return 422 - Unprocessable Entity when validation fails
-                return new UnprocessableEntityObjectResult(ModelState);
+                return new UnprocessableEntityObjectResult(this.ModelState);
 
             Movie movieEntity = this.mapper.Map<Movie>(movieForCreation);
             this.moviesRepository.AddMovie(movieEntity);
@@ -90,9 +90,9 @@
             // Fetch the movie from the data store so the director is included
             await this.moviesRepository.GetMovieAsync(movieEntity.Id);
 
-            return CreatedAtRoute("GetMovie",
+            return this.CreatedAtRoute("GetMovie",
                 new { movieId = movieEntity.Id },
-                mapper.Map<Models.Movie>(movieEntity));
+                this.mapper.Map<Models.Movie>(movieEntity));
         }
 
         /// <summary>
@@ -105,18 +105,18 @@
         public async Task<IActionResult> UpdateMovie(Guid movieId, [FromBody] Models.MovieForUpdate movieForUpdate)
         {
             // model validation
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
                 // return 422 - Unprocessable Entity when validation fails
-                return new UnprocessableEntityObjectResult(ModelState);
+                return new UnprocessableEntityObjectResult(this.ModelState);
 
             Movie movieEntity = await this.moviesRepository.GetMovieAsync(movieId);
 
             if (movieEntity == null)
-                return NotFound();
+                return this.NotFound();
 
             // map the inputted object into the movie entity
             // this ensures properties will get updated
-            mapper.Map(movieForUpdate, movieEntity);
+            this.mapper.Map(movieForUpdate, movieEntity);
 
             // call into UpdateMovie even though in our implementation
             // this doesn't contain code - doing this ensures the code stays
@@ -126,7 +126,7 @@
             await this.moviesRepository.SaveChangesAsync();
 
             // return the updated movie, after mapping it
-            return Ok(this.mapper.Map<Models.Movie>(movieEntity));
+            return this.Ok(this.mapper.Map<Models.Movie>(movieEntity));
         }
 
         /// <summary>
@@ -141,15 +141,15 @@
             Movie movieEntity = await this.moviesRepository.GetMovieAsync(movieId);
 
             if (movieEntity == null)
-                return NotFound();
+                return this.NotFound();
 
             // the patch is on a DTO, not on the movie entity
             Models.MovieForUpdate movieToPatch = Mapper.Map<Models.MovieForUpdate>(movieEntity);
 
-            patchDoc.ApplyTo(movieToPatch, ModelState);
+            patchDoc.ApplyTo(movieToPatch, this.ModelState);
 
-            if (!ModelState.IsValid)
-                return new UnprocessableEntityObjectResult(ModelState);
+            if (!this.ModelState.IsValid)
+                return new UnprocessableEntityObjectResult(this.ModelState);
 
             // map back to the entity, and save
             Mapper.Map(movieToPatch, movieEntity);
@@ -161,7 +161,7 @@
             await this.moviesRepository.SaveChangesAsync();
 
             // return the updated movie, after mapping it
-            return Ok(mapper.Map<Models.Movie>(movieEntity));
+            return this.Ok(this.mapper.Map<Models.Movie>(movieEntity));
         }
 
         /// <summary>
@@ -175,12 +175,12 @@
             Movie movieEntity = await this.moviesRepository.GetMovieAsync(movieId);
 
             if (movieEntity == null)
-                return NotFound();
+                return this.NotFound();
 
             this.moviesRepository.DeleteMovie(movieEntity);
             await this.moviesRepository.SaveChangesAsync();
 
-            return NoContent();
+            return this.NoContent();
         }
     }
 }

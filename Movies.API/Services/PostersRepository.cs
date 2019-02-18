@@ -38,9 +38,7 @@
              .FirstOrDefaultAsync(m => m.Id == movieId);
 
             if (movie == null)
-            {
                 throw new Exception($"Movie with id {movieId} not found.");
-            }
 
             // generate a movie poster of 500KB
             Random random = new Random();
@@ -68,6 +66,7 @@
             // after setting the ids
             posterToAdd.MovieId = movieId;
             posterToAdd.Id = Guid.NewGuid();
+
             return await Task.FromResult(posterToAdd);
         }
 

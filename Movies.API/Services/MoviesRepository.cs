@@ -31,20 +31,14 @@
         /// </summary>
         /// <param name="movieId">The movieId<see cref="Guid"/></param>
         /// <returns>The <see cref="Task{Movie}"/></returns>
-        public async Task<Movie> GetMovieAsync(Guid movieId)
-        {
-            return await this._context.Movies.Include(m => m.Director)
+        public async Task<Movie> GetMovieAsync(Guid movieId) => await this._context.Movies.Include(m => m.Director)
                 .FirstOrDefaultAsync(m => m.Id == movieId);
-        }
 
         /// <summary>
         /// The GetMoviesAsync
         /// </summary>
         /// <returns>The <see cref="Task{IEnumerable{Movie}}"/></returns>
-        public async Task<IEnumerable<Movie>> GetMoviesAsync()
-        {
-            return await this._context.Movies.Include(m => m.Director).ToListAsync();
-        }
+        public async Task<IEnumerable<Movie>> GetMoviesAsync() => await this._context.Movies.Include(m => m.Director).ToListAsync();
 
         /// <summary>
         /// The UpdateMovie
@@ -80,13 +74,10 @@
 
         /// <summary>
         /// The SaveChangesAsync
+        /// return true if 1 or more entities were changed
         /// </summary>
         /// <returns>The <see cref="Task{bool}"/></returns>
-        public async Task<bool> SaveChangesAsync()
-        {
-            // return true if 1 or more entities were changed
-            return (await this._context.SaveChangesAsync() > 0);
-        }
+        public async Task<bool> SaveChangesAsync() => (await this._context.SaveChangesAsync() > 0);
 
         /// <summary>
         /// The Dispose
@@ -104,13 +95,11 @@
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
-            {
                 if (this._context != null)
                 {
                     this._context.Dispose();
                     this._context = null;
                 }
-            }
         }
     }
 }

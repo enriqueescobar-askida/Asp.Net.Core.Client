@@ -47,9 +47,9 @@
             Poster poster = await this.postersRepository.GetPosterAsync(movieId, posterId);
 
             if (poster == null)
-                return NotFound();
+                return this.NotFound();
 
-            return Ok(this.mapper.Map<Models.Poster>(poster));
+            return this.Ok(this.mapper.Map<Models.Poster>(poster));
         }
 
         /// <summary>
@@ -63,11 +63,11 @@
         {
             // model validation
             if (posterForCreation == null)
-                return BadRequest();
+                return this.BadRequest();
 
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
                 // return 422 - Unprocessable Entity when validation fails
-                return new UnprocessableEntityObjectResult(ModelState);
+                return new UnprocessableEntityObjectResult(this.ModelState);
 
             Poster poster = this.mapper.Map<Poster>(posterForCreation);
             Poster createdPoster = await this.postersRepository.AddPoster(movieId, poster);
@@ -76,7 +76,7 @@
             // immediately persisted.
 
             // map the poster from the repository to a shared model poster
-            return CreatedAtRoute("GetPoster",
+            return this.CreatedAtRoute("GetPoster",
                 new { movieId, posterId = createdPoster.Id },
                 this.mapper.Map<Models.Poster>(createdPoster));
         }

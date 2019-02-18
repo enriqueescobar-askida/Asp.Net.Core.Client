@@ -3,20 +3,31 @@
     using Microsoft.EntityFrameworkCore;
     using Movies.API.Entities;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
 
+    /// <summary>
+    /// Defines the <see cref="MoviesContext" />
+    /// </summary>
     public class MoviesContext : DbContext
     {
+        /// <summary>
+        /// Gets or sets the Movies
+        /// </summary>
         public DbSet<Movie> Movies { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MoviesContext"/> class.
+        /// </summary>
+        /// <param name="options">The options<see cref="DbContextOptions{MoviesContext}"/></param>
         public MoviesContext(DbContextOptions<MoviesContext> options)
             : base(options)
         {
         }
 
         // seed the database with data
+        /// <summary>
+        /// The OnModelCreating
+        /// </summary>
+        /// <param name="modelBuilder">The modelBuilder<see cref="ModelBuilder"/></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Director>().HasData(
@@ -64,7 +75,7 @@
                     DirectorId = Guid.Parse("d28888e9-2ba9-473a-a40f-e38cb54f9b35"),
                     Title = "Pulp Fiction",
                     Description = "The lives of two mob hitmen, a boxer, a gangster's wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
-                    ReleaseDate = new DateTimeOffset(new DateTime(1994,11,9)),
+                    ReleaseDate = new DateTimeOffset(new DateTime(1994, 11, 9)),
                     Genre = "Crime, Drama"
                 },
                 new Movie
@@ -124,6 +135,5 @@
 
             base.OnModelCreating(modelBuilder);
         }
-
     }
 }

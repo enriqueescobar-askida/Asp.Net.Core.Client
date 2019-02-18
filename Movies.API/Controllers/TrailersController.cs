@@ -15,12 +15,12 @@
     public class TrailersController : ControllerBase
     {
         /// <summary>
-        /// Defines the _trailersRepository
+        /// Defines the trailersRepository
         /// </summary>
         private readonly ITrailersRepository trailersRepository;
 
         /// <summary>
-        /// Defines the _mapper
+        /// Defines the mapper
         /// </summary>
         private readonly IMapper mapper;
 
@@ -47,9 +47,9 @@
             Trailer trailer = await this.trailersRepository.GetTrailerAsync(movieId, trailerId);
 
             if (trailer == null)
-                return NotFound();
+                return this.NotFound();
 
-            return Ok(this.mapper.Map<Models.Trailer>(trailer));
+            return this.Ok(this.mapper.Map<Models.Trailer>(trailer));
         }
 
         /// <summary>
@@ -63,11 +63,11 @@
         {
             // model validation
             if (trailerForCreation == null)
-                return BadRequest();
+                return this.BadRequest();
 
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
                 // return 422 - Unprocessable Entity when validation fails
-                return new UnprocessableEntityObjectResult(ModelState);
+                return new UnprocessableEntityObjectResult(this.ModelState);
 
             Trailer trailer = this.mapper.Map<Trailer>(trailerForCreation);
             Trailer createdTrailer = await this.trailersRepository.AddTrailer(movieId, trailer);
@@ -76,7 +76,7 @@
             // immediately persisted.
 
             // map the trailer from the repository to a shared model trailer
-            return CreatedAtRoute("GetTrailer",
+            return this.CreatedAtRoute("GetTrailer",
                 new { movieId, trailerId = createdTrailer.Id },
                 this.mapper.Map<Models.Trailer>(createdTrailer));
         }
