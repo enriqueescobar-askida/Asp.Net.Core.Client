@@ -9,41 +9,40 @@ namespace Movies.Client
 {
     class Program
     {
- 
+
         static async Task Main(string[] args)
         {
-            // create a new ServiceCollection 
-            var serviceCollection = new ServiceCollection();
-
+            // create a new ServiceCollection
+            ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
 
             // create a new ServiceProvider
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            
-            // For demo purposes: overall catch-all to log any exception that might 
-            // happen to the console & wait for key input afterwards so we can easily 
-            // inspect the issue.  
+            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+
+            // For demo purposes: overall catch-all to log any exception that might
+            // happen to the console & wait for key input afterwards so we can easily
+            // inspect the issue.
             try
             {
                 // Run our IntegrationService containing all samples and
-                // await this call to ensure the application doesn't 
+                // await this call to ensure the application doesn't
                 // prematurely exit.
                 await serviceProvider.GetService<IIntegrationService>().Run();
             }
             catch (Exception generalException)
             {
                 // log the exception
-                var logger = serviceProvider.GetService<ILogger<Program>>();
-                logger.LogError(generalException, 
+                ILogger<Program> logger = serviceProvider.GetService<ILogger<Program>>();
+                logger.LogError(generalException,
                     "An exception happened while running the integration service.");
             }
-            
+
             Console.ReadKey();
         }
 
         private static void ConfigureServices(IServiceCollection serviceCollection)
         {
-            // add loggers           
+            // add loggers
             serviceCollection.AddSingleton(new LoggerFactory()
                   .AddConsole()
                   .AddDebug());
@@ -75,7 +74,6 @@ namespace Movies.Client
             //{
             //    AutomaticDecompression = System.Net.DecompressionMethods.GZip
             //});
-
             serviceCollection.AddHttpClient<MoviesClient>()
                 .ConfigurePrimaryHttpMessageHandler(handler =>
                    new HttpClientHandler()
@@ -83,8 +81,7 @@ namespace Movies.Client
                        AutomaticDecompression = System.Net.DecompressionMethods.GZip
                    });
 
-
-            // register the integration service on our container with a 
+            // register the integration service on our container with a
             // scoped lifetime
 
             // For the CRUD demos
@@ -106,7 +103,7 @@ namespace Movies.Client
             // serviceCollection.AddScoped<IIntegrationService, DealingWithErrorsAndFaultsService>();
 
             // For the custom http handlers demos
-            serviceCollection.AddScoped<IIntegrationService, HttpHandlersService>();     
+            serviceCollection.AddScoped<IIntegrationService, HttpHandlersService>();
         }
     }
 }

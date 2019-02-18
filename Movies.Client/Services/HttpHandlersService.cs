@@ -38,19 +38,13 @@
         /// Initializes a new instance of the <see cref="HttpHandlersService"/> class.
         /// </summary>
         /// <param name="httpClientFactory">The httpClientFactory<see cref="IHttpClientFactory"/></param>
-        public HttpHandlersService(IHttpClientFactory httpClientFactory)
-        {
-            this._httpClientFactory = httpClientFactory;
-        }
+        public HttpHandlersService(IHttpClientFactory httpClientFactory) => this._httpClientFactory = httpClientFactory;
 
         /// <summary>
         /// The Run
         /// </summary>
         /// <returns>The <see cref="Task"/></returns>
-        public async Task Run()
-        {
-            await this.GetMoviesWithRetryPolicy(this._cancellationTokenSource.Token);
-        }
+        public async Task Run() => await this.GetMoviesWithRetryPolicy(this._cancellationTokenSource.Token);
 
         /// <summary>
         /// The GetMoviesWithRetryPolicy

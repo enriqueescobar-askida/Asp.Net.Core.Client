@@ -34,10 +34,7 @@
         /// The Run
         /// </summary>
         /// <returns>The <see cref="Task"/></returns>
-        public async Task Run()
-        {
-            await this.PatchResource();
-        }
+        public async Task Run() => await this.PatchResource();
 
         /// <summary>
         /// The PatchResource

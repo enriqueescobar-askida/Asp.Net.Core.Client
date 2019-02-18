@@ -51,10 +51,7 @@
         /// await TestPostAndReadPosterWithStreams();
         /// </summary>
         /// <returns>The <see cref="Task"/></returns>
-        public async Task Run()
-        {
-            await this.GetPosterWithGZipCompression();
-        }
+        public async Task Run() => await this.GetPosterWithGZipCompression();
 
         /// <summary>
         /// The GetPosterWithStream

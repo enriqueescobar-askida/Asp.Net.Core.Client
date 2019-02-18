@@ -36,13 +36,10 @@
 
         /// <summary>
         /// The Run
+        /// await GetMovieAndDealWithInvalidResponses(_cancellationTokenSource.Token);
         /// </summary>
         /// <returns>The <see cref="Task"/></returns>
-        public async Task Run()
-        {
-            // await GetMovieAndDealWithInvalidResponses(_cancellationTokenSource.Token);
-            await this.PostMovieAndHandleValdationErrors(this._cancellationTokenSource.Token);
-        }
+        public async Task Run() => await this.PostMovieAndHandleValdationErrors(this._cancellationTokenSource.Token);
 
         /// <summary>
         /// The GetMovieAndDealWithInvalidResponses

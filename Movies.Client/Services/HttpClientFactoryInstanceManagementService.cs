@@ -18,8 +18,7 @@
         /// <summary>
         /// Defines the _cancellationTokenSource
         /// </summary>
-        private readonly CancellationTokenSource _cancellationTokenSource =
-            new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         /// <summary>
         /// Defines the _httpClientFactory
@@ -45,17 +44,14 @@
 
         /// <summary>
         /// The Run
+        /// await TestDisposeHttpClient(_cancellationTokenSource.Token);
+        /// await TestReuseHttpClient(_cancellationTokenSource.Token);
+        /// await GetMoviesWithHttpClientFromFactory(_cancellationTokenSource.Token);
+        /// await GetMoviesWithNamedHttpClientFromFactory(_cancellationTokenSource.Token);
+        /// await GetMoviesWithTypedHttpClientFromFactory(_cancellationTokenSource.Token);
         /// </summary>
         /// <returns>The <see cref="Task"/></returns>
-        public async Task Run()
-        {
-            // await TestDisposeHttpClient(_cancellationTokenSource.Token);
-            // await TestReuseHttpClient(_cancellationTokenSource.Token);
-            // await GetMoviesWithHttpClientFromFactory(_cancellationTokenSource.Token);
-            // await GetMoviesWithNamedHttpClientFromFactory(_cancellationTokenSource.Token);
-            // await GetMoviesWithTypedHttpClientFromFactory(_cancellationTokenSource.Token);
-            await this.GetMoviesViaMoviesClient(this._cancellationTokenSource.Token);
-        }
+        public async Task Run() => await this.GetMoviesViaMoviesClient(this._cancellationTokenSource.Token);
 
         /// <summary>
         /// The TestDisposeHttpClient

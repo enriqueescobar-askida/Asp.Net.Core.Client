@@ -34,16 +34,13 @@
 
         /// <summary>
         /// The Run
+        /// await GetResource();
+        /// await GetResourceThroughHttpRequestMessage();
+        /// await CreateResource();
+        /// await UpdateResource();
         /// </summary>
         /// <returns>The <see cref="Task"/></returns>
-        public async Task Run()
-        {
-            // await GetResource();
-            // await GetResourceThroughHttpRequestMessage();
-            // await CreateResource();
-            // await UpdateResource();
-            await this.DeleteResource();
-        }
+        public async Task Run() => await this.DeleteResource();
 
         /// <summary>
         /// The GetResource

@@ -4,6 +4,7 @@
     using Movies.Client.Models;
     using System;
     using System.IO;
+    using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading;
@@ -18,9 +19,9 @@
         /// Defines the _httpClient
         /// </summary>
         private static HttpClient _httpClient = new HttpClient(
-          new HttpClientHandler()
+          new HttpClientHandler
           {
-              AutomaticDecompression = System.Net.DecompressionMethods.GZip
+              AutomaticDecompression = DecompressionMethods.GZip
           });
 
         /// <summary>
@@ -41,14 +42,11 @@
 
         /// <summary>
         /// The Run
+        /// _cancellationTokenSource.CancelAfter(2000);
+        /// await GetTrailerAndCancel(_cancellationTokenSource.Token);
         /// </summary>
         /// <returns>The <see cref="Task"/></returns>
-        public async Task Run()
-        {
-            //_cancellationTokenSource.CancelAfter(2000);
-            //await GetTrailerAndCancel(_cancellationTokenSource.Token);
-            await this.GetTrailerAndHandleTimeout();
-        }
+        public async Task Run() => await this.GetTrailerAndHandleTimeout();
 
         /// <summary>
         /// The GetTrailerAndCancel
