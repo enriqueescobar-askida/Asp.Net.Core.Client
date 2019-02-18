@@ -1,25 +1,34 @@
-﻿using Movies.Client.Models;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using Marvin.StreamExtensions;
-
-namespace Movies.Client.Services
+﻿namespace Movies.Client.Services
 {
+    using Marvin.StreamExtensions;
+    using Movies.Client.Models;
+    using Newtonsoft.Json;
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Text;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Defines the <see cref="StreamService" />
+    /// </summary>
     public class StreamService : IIntegrationService
     {
         //private static HttpClient _httpClient = new HttpClient();
-
+        /// <summary>
+        /// Defines the _httpClient
+        /// </summary>
         private static HttpClient _httpClient = new HttpClient(
-            new HttpClientHandler() {
-                AutomaticDecompression = System.Net.DecompressionMethods.GZip });
+            new HttpClientHandler()
+            {
+                AutomaticDecompression = System.Net.DecompressionMethods.GZip
+            });
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamService"/> class.
+        /// </summary>
         public StreamService()
         {
             // set up HttpClient instance
@@ -28,34 +37,41 @@ namespace Movies.Client.Services
             _httpClient.DefaultRequestHeaders.Clear();
         }
 
+        /// <summary>
+        /// The Run
+        /// await GetPosterWithStream();
+        /// await GetPosterWithStreamAndCompletionMode();
+        /// await TestGetPosterWithoutStream();
+        /// await TestGetPosterWithStream();
+        /// await TestGetPosterWithStreamAndCompletionMode();
+        /// await PostPosterWithStream();
+        /// await PostAndReadPosterWithStreams();
+        /// await TestPostPosterWithoutStream();
+        /// await TestPostPosterWithStream();
+        /// await TestPostAndReadPosterWithStreams();
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task Run()
         {
-            // await GetPosterWithStream();
-            // await GetPosterWithStreamAndCompletionMode();
-            // await TestGetPosterWithoutStream();
-            // await TestGetPosterWithStream();
-            // await TestGetPosterWithStreamAndCompletionMode();
-            // await PostPosterWithStream();
-            // await PostAndReadPosterWithStreams();
-            // await TestPostPosterWithoutStream();
-            // await TestPostPosterWithStream();
-            // await TestPostAndReadPosterWithStreams();
-            await GetPosterWithGZipCompression();
+            await this.GetPosterWithGZipCompression();
         }
 
+        /// <summary>
+        /// The GetPosterWithStream
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task GetPosterWithStream()
         {
-            var request = new HttpRequestMessage(
+            HttpRequestMessage request = new HttpRequestMessage(
                 HttpMethod.Get,
                 $"api/movies/d8663e5e-7494-4f81-8739-6e0de1bea7ee/posters/{Guid.NewGuid()}");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            using (var response = await _httpClient.SendAsync(request))
+            using (HttpResponseMessage response = await _httpClient.SendAsync(request))
             {
                 response.EnsureSuccessStatusCode();
-
-                var stream = await response.Content.ReadAsStreamAsync();
-                var poster = stream.ReadAndDeserializeFromJson<Poster>();
+                Stream stream = await response.Content.ReadAsStreamAsync();
+                Poster poster = stream.ReadAndDeserializeFromJson<Poster>();
 
                 //using (var streamReader = new StreamReader(stream))
                 //{
@@ -64,26 +80,29 @@ namespace Movies.Client.Services
                 //        var jsonSerializer = new JsonSerializer();
                 //        var poster = jsonSerializer.Deserialize<Poster>(jsonTextReader);
 
-                //        // do something with the poster     
+                //        // do something with the poster
                 //    }
                 //}
             }
         }
 
+        /// <summary>
+        /// The GetPosterWithStreamAndCompletionMode
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task GetPosterWithStreamAndCompletionMode()
         {
-            var request = new HttpRequestMessage(
+            HttpRequestMessage request = new HttpRequestMessage(
                 HttpMethod.Get,
                 $"api/movies/d8663e5e-7494-4f81-8739-6e0de1bea7ee/posters/{Guid.NewGuid()}");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            using (var response = await _httpClient.SendAsync(request, 
+            using (HttpResponseMessage response = await _httpClient.SendAsync(request,
                 HttpCompletionOption.ResponseHeadersRead))
             {
                 response.EnsureSuccessStatusCode();
-
-                var stream = await response.Content.ReadAsStreamAsync();
-                var poster = stream.ReadAndDeserializeFromJson<Poster>();
+                Stream stream = await response.Content.ReadAsStreamAsync();
+                Poster poster = stream.ReadAndDeserializeFromJson<Poster>();
 
                 //using (var streamReader = new StreamReader(stream))
                 //{
@@ -92,44 +111,52 @@ namespace Movies.Client.Services
                 //        var jsonSerializer = new JsonSerializer();
                 //        var poster = jsonSerializer.Deserialize<Poster>(jsonTextReader);
 
-                //        // do something with the poster     
+                //        // do something with the poster
                 //    }
                 //}
             }
         }
 
+        /// <summary>
+        /// The GetPosterWithoutStream
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task GetPosterWithoutStream()
         {
-            var request = new HttpRequestMessage(
+            HttpRequestMessage request = new HttpRequestMessage(
                 HttpMethod.Get,
                 $"api/movies/d8663e5e-7494-4f81-8739-6e0de1bea7ee/posters/{Guid.NewGuid()}");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await _httpClient.SendAsync(request);
+            HttpResponseMessage response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var posters = JsonConvert.DeserializeObject<Poster>(content);
+            string content = await response.Content.ReadAsStringAsync();
+            Poster posters = JsonConvert.DeserializeObject<Poster>(content);
         }
 
+        /// <summary>
+        /// The PostPosterWithStream
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task PostPosterWithStream()
         {
             // generate a movie poster of 500KB
-            var random = new Random();
-            var generatedBytes = new byte[524288];
+            Random random = new Random();
+            byte[] generatedBytes = new byte[524288];
             random.NextBytes(generatedBytes);
 
-            var posterForCreation = new PosterForCreation()
+            PosterForCreation posterForCreation = new PosterForCreation()
             {
                 Name = "A new poster for The Big Lebowski",
                 Bytes = generatedBytes
             };
 
-            var memoryContentStream = new MemoryStream();
+            MemoryStream memoryContentStream = new MemoryStream();
             memoryContentStream.SerializeToJsonAndWrite(posterForCreation,
                 new UTF8Encoding(), 1024, true);
 
-            //using (var streamWriter = new StreamWriter(memoryContentStream, 
+            //using (var streamWriter = new StreamWriter(memoryContentStream,
             //    new UTF8Encoding(), 1024, true))
             //{
             //    using (var jsonTextWriter = new JsonTextWriter(streamWriter))
@@ -141,128 +168,139 @@ namespace Movies.Client.Services
             //}
 
             memoryContentStream.Seek(0, SeekOrigin.Begin);
-            using (var request = new HttpRequestMessage(
+            using (HttpRequestMessage request = new HttpRequestMessage(
               HttpMethod.Post,
               $"api/movies/d8663e5e-7494-4f81-8739-6e0de1bea7ee/posters"))
             {
                 request.Headers.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
 
-                using (var streamContent = new StreamContent(memoryContentStream))
+                using (StreamContent streamContent = new StreamContent(memoryContentStream))
                 {
                     request.Content = streamContent;
-                    request.Content.Headers.ContentType =
-                      new MediaTypeHeaderValue("application/json");
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                    var response = await _httpClient.SendAsync(request);
+                    HttpResponseMessage response = await _httpClient.SendAsync(request);
                     response.EnsureSuccessStatusCode();
 
-                    var createdContent = await response.Content.ReadAsStringAsync();
-                    var createdPoster = JsonConvert.DeserializeObject<Poster>(createdContent);
+                    string createdContent = await response.Content.ReadAsStringAsync();
+                    Poster createdPoster = JsonConvert.DeserializeObject<Poster>(createdContent);
                 }
             }
         }
 
+        /// <summary>
+        /// The PostAndReadPosterWithStreams
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task PostAndReadPosterWithStreams()
         {
             // generate a movie poster of 500KB
-            var random = new Random();
-            var generatedBytes = new byte[524288];
+            Random random = new Random();
+            byte[] generatedBytes = new byte[524288];
             random.NextBytes(generatedBytes);
 
-            var posterForCreation = new PosterForCreation()
+            PosterForCreation posterForCreation = new PosterForCreation()
             {
                 Name = "A new poster for The Big Lebowski",
                 Bytes = generatedBytes
             };
 
-            var memoryContentStream = new MemoryStream();
-            memoryContentStream.SerializeToJsonAndWrite(posterForCreation,
-                          new UTF8Encoding(), 1024, true);
+            MemoryStream memoryContentStream = new MemoryStream();
+            memoryContentStream.SerializeToJsonAndWrite(posterForCreation, new UTF8Encoding(), 1024, true);
 
             memoryContentStream.Seek(0, SeekOrigin.Begin);
-            using (var request = new HttpRequestMessage(
+            using (HttpRequestMessage request = new HttpRequestMessage(
               HttpMethod.Post,
               $"api/movies/d8663e5e-7494-4f81-8739-6e0de1bea7ee/posters"))
             {
                 request.Headers.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
 
-                using (var streamContent = new StreamContent(memoryContentStream))
+                using (StreamContent streamContent = new StreamContent(memoryContentStream))
                 {
                     request.Content = streamContent;
                     request.Content.Headers.ContentType =
                       new MediaTypeHeaderValue("application/json");
 
-                    using (var response = await _httpClient
+                    using (HttpResponseMessage response = await _httpClient
                         .SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
                     {
                         response.EnsureSuccessStatusCode();
-                        var stream = await response.Content.ReadAsStreamAsync();
-                        var poster = stream.ReadAndDeserializeFromJson<Poster>();
+                        Stream stream = await response.Content.ReadAsStreamAsync();
+                        Poster poster = stream.ReadAndDeserializeFromJson<Poster>();
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// The PostPosterWithoutStream
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task PostPosterWithoutStream()
         {
             // generate a movie poster of 500KB
-            var random = new Random();
-            var generatedBytes = new byte[524288];
+            Random random = new Random();
+            byte[] generatedBytes = new byte[524288];
             random.NextBytes(generatedBytes);
 
-            var posterForCreation = new PosterForCreation()
+            PosterForCreation posterForCreation = new PosterForCreation()
             {
                 Name = "A new poster for The Big Lebowski",
                 Bytes = generatedBytes
             };
 
-            var serializedPosterForCreation = JsonConvert.SerializeObject(posterForCreation);
+            string serializedPosterForCreation = JsonConvert.SerializeObject(posterForCreation);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, 
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,
                 "api/movies/d8663e5e-7494-4f81-8739-6e0de1bea7ee/posters");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Content = new StringContent(serializedPosterForCreation);
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var response = await _httpClient.SendAsync(request);
+            HttpResponseMessage response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var createdMovie = JsonConvert.DeserializeObject<Poster>(content);
+            string content = await response.Content.ReadAsStringAsync();
+            Poster createdMovie = JsonConvert.DeserializeObject<Poster>(content);
         }
 
+        /// <summary>
+        /// The GetPosterWithGZipCompression
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task GetPosterWithGZipCompression()
         {
-            var request = new HttpRequestMessage(
+            HttpRequestMessage request = new HttpRequestMessage(
                 HttpMethod.Get,
                 $"api/movies/d8663e5e-7494-4f81-8739-6e0de1bea7ee/posters/{Guid.NewGuid()}");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
 
-            using (var response = await _httpClient.SendAsync(request))
+            using (HttpResponseMessage response = await _httpClient.SendAsync(request))
             {
                 response.EnsureSuccessStatusCode();
-
-                var stream = await response.Content.ReadAsStreamAsync();
-                var poster = stream.ReadAndDeserializeFromJson<Poster>();
+                Stream stream = await response.Content.ReadAsStreamAsync();
+                Poster poster = stream.ReadAndDeserializeFromJson<Poster>();
             }
         }
 
+        /// <summary>
+        /// The TestPostPosterWithoutStream
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task TestPostPosterWithoutStream()
         {
             // warmup
-            await PostPosterWithoutStream();
+            await this.PostPosterWithoutStream();
 
-            // start stopwatch 
-            var stopWatch = Stopwatch.StartNew();
+            // start stopwatch
+            Stopwatch stopWatch = Stopwatch.StartNew();
 
             // run requests
             for (int i = 0; i < 200; i++)
-            {
-                await PostPosterWithoutStream();
-            }
+                await this.PostPosterWithoutStream();
 
             // stop stopwatch
             stopWatch.Stop();
@@ -271,20 +309,21 @@ namespace Movies.Client.Services
                 $"averaging {stopWatch.ElapsedMilliseconds / 200} milliseconds/request");
         }
 
-
+        /// <summary>
+        /// The TestPostPosterWithStream
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task TestPostPosterWithStream()
         {
             // warmup
-            await PostPosterWithStream();
+            await this.PostPosterWithStream();
 
-            // start stopwatch 
-            var stopWatch = Stopwatch.StartNew();
+            // start stopwatch
+            Stopwatch stopWatch = Stopwatch.StartNew();
 
             // run requests
             for (int i = 0; i < 200; i++)
-            {
-                await PostPosterWithStream();
-            }
+                await this.PostPosterWithStream();
 
             // stop stopwatch
             stopWatch.Stop();
@@ -293,20 +332,21 @@ namespace Movies.Client.Services
                 $"averaging {stopWatch.ElapsedMilliseconds / 200} milliseconds/request");
         }
 
-
+        /// <summary>
+        /// The TestPostAndReadPosterWithStreams
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task TestPostAndReadPosterWithStreams()
         {
             // warmup
-            await PostAndReadPosterWithStreams();
+            await this.PostAndReadPosterWithStreams();
 
-            // start stopwatch 
-            var stopWatch = Stopwatch.StartNew();
+            // start stopwatch
+            Stopwatch stopWatch = Stopwatch.StartNew();
 
             // run requests
             for (int i = 0; i < 200; i++)
-            {
-                await PostAndReadPosterWithStreams();
-            }
+                await this.PostAndReadPosterWithStreams();
 
             // stop stopwatch
             stopWatch.Stop();
@@ -315,21 +355,21 @@ namespace Movies.Client.Services
                 $"averaging {stopWatch.ElapsedMilliseconds / 200} milliseconds/request");
         }
 
-
-
+        /// <summary>
+        /// The TestGetPosterWithoutStream
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task TestGetPosterWithoutStream()
         {
             // warmup
-            await GetPosterWithoutStream();
+            await this.GetPosterWithoutStream();
 
-            // start stopwatch 
-            var stopWatch = Stopwatch.StartNew();
+            // start stopwatch
+            Stopwatch stopWatch = Stopwatch.StartNew();
 
             // run requests
             for (int i = 0; i < 200; i++)
-            {
-                await GetPosterWithoutStream();
-            }
+                await this.GetPosterWithoutStream();
 
             // stop stopwatch
             stopWatch.Stop();
@@ -338,19 +378,21 @@ namespace Movies.Client.Services
                 $"averaging {stopWatch.ElapsedMilliseconds / 200} milliseconds/request");
         }
 
+        /// <summary>
+        /// The TestGetPosterWithStream
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task TestGetPosterWithStream()
         {
             // warmup
-            await GetPosterWithStream();
+            await this.GetPosterWithStream();
 
-            // start stopwatch 
-            var stopWatch = Stopwatch.StartNew();
+            // start stopwatch
+            Stopwatch stopWatch = Stopwatch.StartNew();
 
             // run requests
             for (int i = 0; i < 200; i++)
-            {
-                await GetPosterWithStream();
-            }
+                await this.GetPosterWithStream();
 
             // stop stopwatch
             stopWatch.Stop();
@@ -359,19 +401,21 @@ namespace Movies.Client.Services
                 $"averaging {stopWatch.ElapsedMilliseconds / 200} milliseconds/request");
         }
 
+        /// <summary>
+        /// The TestGetPosterWithStreamAndCompletionMode
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task TestGetPosterWithStreamAndCompletionMode()
         {
             // warmup
-            await GetPosterWithStreamAndCompletionMode();
+            await this.GetPosterWithStreamAndCompletionMode();
 
-            // start stopwatch 
-            var stopWatch = Stopwatch.StartNew();
+            // start stopwatch
+            Stopwatch stopWatch = Stopwatch.StartNew();
 
             // run requests
             for (int i = 0; i < 200; i++)
-            {
-                await GetPosterWithStreamAndCompletionMode();
-            }
+                await this.GetPosterWithStreamAndCompletionMode();
 
             // stop stopwatch
             stopWatch.Stop();
