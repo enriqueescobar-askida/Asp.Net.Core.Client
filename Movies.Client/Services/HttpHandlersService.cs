@@ -1,21 +1,32 @@
-﻿using Marvin.StreamExtensions;
-using Movies.Client.Models;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Movies.Client.Services
+﻿namespace Movies.Client.Services
 {
+    using Marvin.StreamExtensions;
+    using Movies.Client.Models;
+    using System;
+    using System.IO;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Defines the <see cref="HttpHandlersService" />
+    /// </summary>
     public class HttpHandlersService : IIntegrationService
     {
+        /// <summary>
+        /// Defines the _httpClientFactory
+        /// </summary>
         private readonly IHttpClientFactory _httpClientFactory;
-        private CancellationTokenSource _cancellationTokenSource =
-            new CancellationTokenSource();
 
+        /// <summary>
+        /// Defines the _cancellationTokenSource
+        /// </summary>
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+        /// <summary>
+        /// Defines the _notSoNicelyInstantiatedHttpClient
+        /// </summary>
         private static HttpClient _notSoNicelyInstantiatedHttpClient =
            new HttpClient(
                new RetryPolicyDelegatingHandler(
@@ -23,33 +34,43 @@ namespace Movies.Client.Services
                    { AutomaticDecompression = System.Net.DecompressionMethods.GZip },
                    2));
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpHandlersService"/> class.
+        /// </summary>
+        /// <param name="httpClientFactory">The httpClientFactory<see cref="IHttpClientFactory"/></param>
         public HttpHandlersService(IHttpClientFactory httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory;
+            this._httpClientFactory = httpClientFactory;
         }
 
+        /// <summary>
+        /// The Run
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task Run()
         {
-            await GetMoviesWithRetryPolicy(_cancellationTokenSource.Token);
+            await this.GetMoviesWithRetryPolicy(this._cancellationTokenSource.Token);
         }
 
+        /// <summary>
+        /// The GetMoviesWithRetryPolicy
+        /// </summary>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task GetMoviesWithRetryPolicy(CancellationToken cancellationToken)
         {
-            var httpClient = _httpClientFactory.CreateClient("MoviesClient");
-
-            //var request = new HttpRequestMessage(
+            HttpClient httpClient = this._httpClientFactory.CreateClient("MoviesClient");
+            // var request = new HttpRequestMessage(
             //    HttpMethod.Get,
             //    "api/movies/030a43b0-f9a5-405a-811c-bf342524b2be");
-
-            var request = new HttpRequestMessage(
+            HttpRequestMessage request = new HttpRequestMessage(
                 HttpMethod.Get,
                 "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b");
 
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
 
-            using (var response = await httpClient.SendAsync(request,
+            using (HttpResponseMessage response = await httpClient.SendAsync(request,
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken))
             {
@@ -60,18 +81,17 @@ namespace Movies.Client.Services
                     {
                         // show this to the user
                         Console.WriteLine("The requested movie cannot be found.");
+
                         return;
                     }
                     else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    {
                         // trigger a login flow
                         return;
-                    }
                     response.EnsureSuccessStatusCode();
                 }
 
-                var stream = await response.Content.ReadAsStreamAsync();
-                var movie = stream.ReadAndDeserializeFromJson<Movie>();
+                Stream stream = await response.Content.ReadAsStreamAsync();
+                Movie movie = stream.ReadAndDeserializeFromJson<Movie>();
             }
         }
     }

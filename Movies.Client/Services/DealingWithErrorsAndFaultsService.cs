@@ -1,46 +1,64 @@
-﻿using Marvin.StreamExtensions;
-using Movies.Client.Models;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Movies.Client.Services
+﻿namespace Movies.Client.Services
 {
+    using Marvin.StreamExtensions;
+    using Movies.Client.Models;
+    using Newtonsoft.Json;
+    using System;
+    using System.IO;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Defines the <see cref="DealingWithErrorsAndFaultsService" />
+    /// </summary>
     public class DealingWithErrorsAndFaultsService : IIntegrationService
     {
+        /// <summary>
+        /// Defines the _httpClientFactory
+        /// </summary>
         private readonly IHttpClientFactory _httpClientFactory;
-        private CancellationTokenSource _cancellationTokenSource =
-            new CancellationTokenSource();
 
-        public DealingWithErrorsAndFaultsService(
-            IHttpClientFactory httpClientFactory)
+        /// <summary>
+        /// Defines the _cancellationTokenSource
+        /// </summary>
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DealingWithErrorsAndFaultsService"/> class.
+        /// </summary>
+        /// <param name="httpClientFactory">The httpClientFactory<see cref="IHttpClientFactory"/></param>
+        public DealingWithErrorsAndFaultsService(IHttpClientFactory httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory;
+            this._httpClientFactory = httpClientFactory;
         }
 
+        /// <summary>
+        /// The Run
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task Run()
         {
             // await GetMovieAndDealWithInvalidResponses(_cancellationTokenSource.Token);
-            await PostMovieAndHandleValdationErrors(_cancellationTokenSource.Token);
+            await this.PostMovieAndHandleValdationErrors(this._cancellationTokenSource.Token);
         }
 
-        private async Task GetMovieAndDealWithInvalidResponses(
-            CancellationToken cancellationToken)
+        /// <summary>
+        /// The GetMovieAndDealWithInvalidResponses
+        /// </summary>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task GetMovieAndDealWithInvalidResponses(CancellationToken cancellationToken)
         {
-            var httpClient = _httpClientFactory.CreateClient("MoviesClient");
-
-            var request = new HttpRequestMessage(
+            HttpClient httpClient = this._httpClientFactory.CreateClient(@"MoviesClient");
+            HttpRequestMessage request = new HttpRequestMessage(
                 HttpMethod.Get,
                 "api/movies/030a43b0-f9a5-405a-811c-bf342524b2be");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
 
-            using (var response = await httpClient.SendAsync(request,
+            using (HttpResponseMessage response = await httpClient.SendAsync(request,
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken))
             {
@@ -51,27 +69,29 @@ namespace Movies.Client.Services
                     {
                         // show this to the user
                         Console.WriteLine("The requested movie cannot be found.");
+
                         return;
                     }
                     else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    {
                         // trigger a login flow
                         return;
-                    }
                     response.EnsureSuccessStatusCode();
                 }
 
-                var stream = await response.Content.ReadAsStreamAsync();
-                var movie = stream.ReadAndDeserializeFromJson<Movie>();
+                Stream stream = await response.Content.ReadAsStreamAsync();
+                Movie movie = stream.ReadAndDeserializeFromJson<Movie>();
             }
         }
 
-        private async Task PostMovieAndHandleValdationErrors(
-            CancellationToken cancellationToken)
+        /// <summary>
+        /// The PostMovieAndHandleValdationErrors
+        /// </summary>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task PostMovieAndHandleValdationErrors(CancellationToken cancellationToken)
         {
-            var httpClient = _httpClientFactory.CreateClient("MoviesClient");
-
-            var movieForCreation = new MovieForCreation()
+            HttpClient httpClient = this._httpClientFactory.CreateClient(@"MoviesClient");
+            MovieForCreation movieForCreation = new MovieForCreation
             {
                 Title = "Pulp Fiction",
                 Description = "Too short",
@@ -80,11 +100,9 @@ namespace Movies.Client.Services
                 Genre = "Crime, Drama"
             };
 
-            var serializedMovieForCreation = JsonConvert.SerializeObject(movieForCreation);
+            string serializedMovieForCreation = JsonConvert.SerializeObject(movieForCreation);
 
-            using (var request = new HttpRequestMessage(
-                HttpMethod.Post,
-                "api/movies"))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/movies"))
             {
                 request.Headers.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
@@ -92,7 +110,7 @@ namespace Movies.Client.Services
                 request.Content = new StringContent(serializedMovieForCreation);
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                using (var response = await httpClient.SendAsync(request,
+                using (HttpResponseMessage response = await httpClient.SendAsync(request,
                         HttpCompletionOption.ResponseHeadersRead,
                         cancellationToken))
                 {
@@ -100,19 +118,18 @@ namespace Movies.Client.Services
                     {
                         if (response.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
                         {
-                            var errorStream = await response.Content.ReadAsStreamAsync();
-                            var validationErrors = errorStream.ReadAndDeserializeFromJson();
+                            Stream errorStream = await response.Content.ReadAsStreamAsync();
+                            object validationErrors = errorStream.ReadAndDeserializeFromJson();
                             Console.WriteLine(validationErrors);
+
                             return;
                         }
                         else
-                        {
                             response.EnsureSuccessStatusCode();
-                        }
                     }
 
-                    var stream = await response.Content.ReadAsStreamAsync();
-                    var movie = stream.ReadAndDeserializeFromJson<Movie>();
+                    Stream stream = await response.Content.ReadAsStreamAsync();
+                    Movie movie = stream.ReadAndDeserializeFromJson<Movie>();
                 }
             }
         }

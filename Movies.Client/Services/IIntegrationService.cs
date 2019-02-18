@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Movies.Client.Services
+﻿namespace Movies.Client.Services
 {
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Defines the <see cref="IIntegrationService" />
+    /// </summary>
     public interface IIntegrationService
     {
+        /// <summary>
+        /// The Run
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         Task Run();
     }
 }

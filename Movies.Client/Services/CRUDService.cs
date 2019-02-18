@@ -1,74 +1,93 @@
-﻿using Movies.Client.Models;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-
-namespace Movies.Client.Services
+﻿namespace Movies.Client.Services
 {
+    using Movies.Client.Models;
+    using Newtonsoft.Json;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.Xml.Serialization;
+
+    /// <summary>
+    /// Defines the <see cref="CRUDService" />
+    /// </summary>
     public class CRUDService : IIntegrationService
     {
+        /// <summary>
+        /// Defines the _httpClient
+        /// </summary>
         private static HttpClient _httpClient = new HttpClient();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CRUDService"/> class.
+        /// </summary>
         public CRUDService()
         {
             // set up HttpClient instance
             _httpClient.BaseAddress = new Uri("http://localhost:57863");
             _httpClient.Timeout = new TimeSpan(0, 0, 30);
             _httpClient.DefaultRequestHeaders.Clear();
-            //_httpClient.DefaultRequestHeaders.Accept.Add(
-            //    new MediaTypeWithQualityHeaderValue("application/json"));
-            //_httpClient.DefaultRequestHeaders.Accept.Add(
-            //    new MediaTypeWithQualityHeaderValue("application/xml", 0.9));
         }
 
+        /// <summary>
+        /// The Run
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task Run()
         {
             // await GetResource();
             // await GetResourceThroughHttpRequestMessage();
             // await CreateResource();
             // await UpdateResource();
-            await DeleteResource();
+            await this.DeleteResource();
         }
 
+        /// <summary>
+        /// The GetResource
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task GetResource()
         {
-            var response = await _httpClient.GetAsync("api/movies");
+            HttpResponseMessage response = await _httpClient.GetAsync("api/movies");
             response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            var movies = new List<Movie>();
+            string content = await response.Content.ReadAsStringAsync();
+            List<Movie> movies = new List<Movie>();
+
             if (response.Content.Headers.ContentType.MediaType == "application/json")
-            {
                 movies = JsonConvert.DeserializeObject<List<Movie>>(content);
-            }
             else if (response.Content.Headers.ContentType.MediaType == "application/xml")
             {
-                var serializer = new XmlSerializer(typeof(List<Movie>));
+                XmlSerializer serializer = new XmlSerializer(typeof(List<Movie>));
                 movies = (List<Movie>)serializer.Deserialize(new StringReader(content));
             }
         }
 
+        /// <summary>
+        /// The GetResourceThroughHttpRequestMessage
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task GetResourceThroughHttpRequestMessage()
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "api/movies");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "api/movies");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var response = await _httpClient.SendAsync(request);
+            HttpResponseMessage response = await _httpClient.SendAsync(request);
 
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var movies = JsonConvert.DeserializeObject<List<Movie>>(content);
-
+            string content = await response.Content.ReadAsStringAsync();
+            List<Movie> movies = JsonConvert.DeserializeObject<List<Movie>>(content);
         }
 
+        /// <summary>
+        /// The CreateResource
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task CreateResource()
         {
-            var movieToCreate = new MovieForCreation()
+            MovieForCreation movieToCreate = new MovieForCreation()
             {
                 Title = "Reservoir Dogs",
                 Description = "After a simple jewelry heist goes terribly wrong, the " +
@@ -78,24 +97,28 @@ namespace Movies.Client.Services
                 Genre = "Crime, Drama"
             };
 
-            var serializedMovieToCreate = JsonConvert.SerializeObject(movieToCreate);
+            string serializedMovieToCreate = JsonConvert.SerializeObject(movieToCreate);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/movies");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/movies");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             request.Content = new StringContent(serializedMovieToCreate);
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var response = await _httpClient.SendAsync(request);
+            HttpResponseMessage response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var createdMovie = JsonConvert.DeserializeObject<Movie>(content);
+            string content = await response.Content.ReadAsStringAsync();
+            Movie createdMovie = JsonConvert.DeserializeObject<Movie>(content);
         }
 
+        /// <summary>
+        /// The UpdateResource
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task UpdateResource()
         {
-            var movieToUpdate = new MovieForUpdate()
+            MovieForUpdate movieToUpdate = new MovieForUpdate()
             {
                 Title = "Pulp Fiction",
                 Description = "The movie with Zed.",
@@ -104,36 +127,44 @@ namespace Movies.Client.Services
                 Genre = "Crime, Drama"
             };
 
-            var serializedMovieToUpdate = JsonConvert.SerializeObject(movieToUpdate);
+            string serializedMovieToUpdate = JsonConvert.SerializeObject(movieToUpdate);
 
-            var request = new HttpRequestMessage(HttpMethod.Put, 
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put,
                 "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Content = new StringContent(serializedMovieToUpdate);
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var response = await _httpClient.SendAsync(request);
+            HttpResponseMessage response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var updatedMovie = JsonConvert.DeserializeObject<Movie>(content);
+            string content = await response.Content.ReadAsStringAsync();
+            Movie updatedMovie = JsonConvert.DeserializeObject<Movie>(content);
         }
 
+        /// <summary>
+        /// The DeleteResource
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task DeleteResource()
         {
-            var request = new HttpRequestMessage(HttpMethod.Delete, 
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete,
                 "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await _httpClient.SendAsync(request);
+            HttpResponseMessage response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
+            string content = await response.Content.ReadAsStringAsync();
         }
 
+        /// <summary>
+        /// The PostResourceShortcut
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task PostResourceShortcut()
         {
-            var movieToCreate = new MovieForCreation()
+            MovieForCreation movieToCreate = new MovieForCreation
             {
                 Title = "Reservoir Dogs",
                 Description = "After a simple jewelry heist goes terribly wrong, the " +
@@ -143,7 +174,7 @@ namespace Movies.Client.Services
                 Genre = "Crime, Drama"
             };
 
-            var response = await _httpClient.PostAsync(
+            HttpResponseMessage response = await _httpClient.PostAsync(
                 "api/movies",
                 new StringContent(
                     JsonConvert.SerializeObject(movieToCreate),
@@ -152,13 +183,17 @@ namespace Movies.Client.Services
 
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var createdMovie = JsonConvert.DeserializeObject<Movie>(content);
+            string content = await response.Content.ReadAsStringAsync();
+            Movie createdMovie = JsonConvert.DeserializeObject<Movie>(content);
         }
 
+        /// <summary>
+        /// The PutResourceShortcut
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task PutResourceShortcut()
         {
-            var movieToUpdate = new MovieForUpdate()
+            MovieForUpdate movieToUpdate = new MovieForUpdate
             {
                 Title = "Pulp Fiction",
                 Description = "The movie with Zed.",
@@ -167,26 +202,30 @@ namespace Movies.Client.Services
                 Genre = "Crime, Drama"
             };
 
-            var response = await _httpClient.PutAsync(
+            HttpResponseMessage response = await _httpClient.PutAsync(
                "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b",
                new StringContent(
                    JsonConvert.SerializeObject(movieToUpdate),
-                   System.Text.Encoding.UTF8,
+                   Encoding.UTF8,
                    "application/json"));
 
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var updatedMovie = JsonConvert.DeserializeObject<Movie>(content);
+            string content = await response.Content.ReadAsStringAsync();
+            Movie updatedMovie = JsonConvert.DeserializeObject<Movie>(content);
         }
 
+        /// <summary>
+        /// The DeleteResourceShortcut
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task DeleteResourceShortcut()
         {
-            var response = await _httpClient.DeleteAsync(
+            HttpResponseMessage response = await _httpClient.DeleteAsync(
                 "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b");
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
+            string content = await response.Content.ReadAsStringAsync();
         }
     }
 }
