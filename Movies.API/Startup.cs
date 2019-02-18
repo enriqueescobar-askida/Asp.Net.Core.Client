@@ -1,17 +1,17 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Movies.API.Contexts;
-using Movies.API.Services;
-using Swashbuckle.AspNetCore.Swagger;
-
-namespace Movies.API
+﻿namespace Movies.API
 {
+    using AutoMapper;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Formatters;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Movies.API.Contexts;
+    using Movies.API.Services;
+    using Swashbuckle.AspNetCore.Swagger;
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -33,18 +33,18 @@ namespace Movies.API
                 options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
                 options.InputFormatters.Add(new XmlSerializerInputFormatter(options));
 
-                // Set XML as default format instead of JSON - the first formatter in the 
-                // list is the default, so we insert the input/output formatters at 
+                // Set XML as default format instead of JSON - the first formatter in the
+                // list is the default, so we insert the input/output formatters at
                 // position 0
                 //options.OutputFormatters.Insert(0, new XmlSerializerOutputFormatter());
                 //options.InputFormatters.Insert(0, new XmlSerializerInputFormatter(options));
             }
             ).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            
+
             // add support for compressing responses (eg gzip)
             services.AddResponseCompression();
 
-            // suppress automatic model state validation when using the 
+            // suppress automatic model state validation when using the
             // ApiController attribute (as it will return a 400 Bad Request
             // instead of the more correct 422 Unprocessable Entity when
             // validation errors are encountered)
@@ -55,7 +55,7 @@ namespace Movies.API
             // register the DbContext on the container, getting the connection string from
             // appSettings (note: use this during development; in a production environment,
             // it's better to store the connection string in an environment variable)
-            var connectionString = Configuration["ConnectionStrings:MoviesDBConnectionString"];
+            string connectionString = Configuration["ConnectionStrings:MoviesDBConnectionString"];
             services.AddDbContext<MoviesContext>(o => o.UseSqlServer(connectionString));
 
             services.AddScoped<IMoviesRepository, MoviesRepository>();
@@ -73,14 +73,14 @@ namespace Movies.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            // use response compression (client should pass through 
+            // use response compression (client should pass through
             // Accept-Encoding)
             app.UseResponseCompression();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
@@ -90,9 +90,7 @@ namespace Movies.API
             });
 
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            } 
 
             app.UseMvc();
         }

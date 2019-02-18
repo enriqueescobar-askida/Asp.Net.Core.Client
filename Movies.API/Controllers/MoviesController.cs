@@ -1,163 +1,184 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Movies.API.Entities;
-using Movies.API.Services;
-
-namespace Movies.API.Controllers
+﻿namespace Movies.API.Controllers
 {
+    using AutoMapper;
+    using Microsoft.AspNetCore.JsonPatch;
+    using Microsoft.AspNetCore.Mvc;
+    using Movies.API.Entities;
+    using Movies.API.Services;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Defines the <see cref="MoviesController" />
+    /// </summary>
     [Route("api/movies")]
     [ApiController]
     public class MoviesController : ControllerBase
     {
-        private readonly IMoviesRepository _moviesRepository;
-        private readonly IMapper _mapper;
+        /// <summary>
+        /// Defines the moviesRepository
+        /// </summary>
+        private readonly IMoviesRepository moviesRepository;
 
-        public MoviesController(IMoviesRepository moviesRepository, 
-            IMapper mapper)
+        /// <summary>
+        /// Defines the mapper
+        /// </summary>
+        private readonly IMapper mapper;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MoviesController"/> class.
+        /// </summary>
+        /// <param name="iMoviesRepository">The moviesRepository<see cref="IMoviesRepository"/></param>
+        /// <param name="imapper">The mapper<see cref="IMapper"/></param>
+        public MoviesController(IMoviesRepository iMoviesRepository, IMapper imapper)
         {
-            _moviesRepository = moviesRepository ?? throw new ArgumentNullException(nameof(moviesRepository));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            this.moviesRepository = iMoviesRepository ?? throw new ArgumentNullException(nameof(iMoviesRepository));
+            this.mapper = imapper ?? throw new ArgumentNullException(nameof(imapper));
         }
 
+        /// <summary>
+        /// The GetMovies
+        /// </summary>
+        /// <returns>The <see cref="Task{ActionResult{IEnumerable{Models.Movie}}}"/></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Models.Movie>>> GetMovies()
         {
-            var movieEntities = await _moviesRepository.GetMoviesAsync();
-            return Ok(_mapper.Map<IEnumerable<Models.Movie>>(movieEntities));
+            var movieEntities = await this.moviesRepository.GetMoviesAsync();
+
+            return Ok(this.mapper.Map<IEnumerable<Models.Movie>>(movieEntities));
         }
 
-        
+        /// <summary>
+        /// The GetMovie
+        /// </summary>
+        /// <param name="movieId">The movieId<see cref="Guid"/></param>
+        /// <returns>The <see cref="Task{ActionResult{Models.Movie}}"/></returns>
         [HttpGet("{movieId}", Name = "GetMovie")]
         public async Task<ActionResult<Models.Movie>> GetMovie(Guid movieId)
         {
-            var movieEntity = await _moviesRepository.GetMovieAsync(movieId);
+            Movie movieEntity = await this.moviesRepository.GetMovieAsync(movieId);
+
             if (movieEntity == null)
-            {
                 return NotFound();
-            }
 
-            return Ok(_mapper.Map<Models.Movie>(movieEntity));
-        } 
+            return Ok(this.mapper.Map<Models.Movie>(movieEntity));
+        }
 
+        /// <summary>
+        /// The CreateMovie
+        /// </summary>
+        /// <param name="movieForCreation">The movieForCreation<see cref="Models.MovieForCreation"/></param>
+        /// <returns>The <see cref="Task{IActionResult}"/></returns>
         [HttpPost]
-        public async Task<IActionResult> CreateMovie(
-            [FromBody] Models.MovieForCreation movieForCreation)
+        public async Task<IActionResult> CreateMovie([FromBody] Models.MovieForCreation movieForCreation)
         {
-            // model validation 
+            // model validation
             if (movieForCreation == null)
-            {
                 return BadRequest();
-            } 
 
             if (!ModelState.IsValid)
-            {
                 // return 422 - Unprocessable Entity when validation fails
                 return new UnprocessableEntityObjectResult(ModelState);
-            }
 
-            var movieEntity = _mapper.Map<Movie>(movieForCreation);
-            _moviesRepository.AddMovie(movieEntity);
-            
+            Movie movieEntity = this.mapper.Map<Movie>(movieForCreation);
+            this.moviesRepository.AddMovie(movieEntity);
+
             // save the changes
-            await _moviesRepository.SaveChangesAsync();
+            await this.moviesRepository.SaveChangesAsync();
 
             // Fetch the movie from the data store so the director is included
-            await _moviesRepository.GetMovieAsync(movieEntity.Id);
+            await this.moviesRepository.GetMovieAsync(movieEntity.Id);
 
             return CreatedAtRoute("GetMovie",
                 new { movieId = movieEntity.Id },
-                _mapper.Map<Models.Movie>(movieEntity));
+                mapper.Map<Models.Movie>(movieEntity));
         }
-         
-        [HttpPut("{movieId}")]
-        public async Task<IActionResult> UpdateMovie(Guid movieId, 
-            [FromBody] Models.MovieForUpdate movieForUpdate)
-        {
-            // model validation 
-            if (movieForUpdate == null)
-            {
-                //return BadRequest();
-            }
 
+        /// <summary>
+        /// The UpdateMovie
+        /// </summary>
+        /// <param name="movieId">The movieId<see cref="Guid"/></param>
+        /// <param name="movieForUpdate">The movieForUpdate<see cref="Models.MovieForUpdate"/></param>
+        /// <returns>The <see cref="Task{IActionResult}"/></returns>
+        [HttpPut("{movieId}")]
+        public async Task<IActionResult> UpdateMovie(Guid movieId, [FromBody] Models.MovieForUpdate movieForUpdate)
+        {
+            // model validation
             if (!ModelState.IsValid)
-            {
                 // return 422 - Unprocessable Entity when validation fails
                 return new UnprocessableEntityObjectResult(ModelState);
-            }
 
-            var movieEntity = await _moviesRepository.GetMovieAsync(movieId);
+            Movie movieEntity = await this.moviesRepository.GetMovieAsync(movieId);
+
             if (movieEntity == null)
-            {
                 return NotFound();
-            }
 
             // map the inputted object into the movie entity
             // this ensures properties will get updated
-            _mapper.Map(movieForUpdate, movieEntity);
+            mapper.Map(movieForUpdate, movieEntity);
 
-            // call into UpdateMovie even though in our implementation 
+            // call into UpdateMovie even though in our implementation
             // this doesn't contain code - doing this ensures the code stays
-            // reliable when other repository implemenations (eg: a mock 
+            // reliable when other repository implementations (e.g.: a mock
             // repository) are used.
-            _moviesRepository.UpdateMovie(movieEntity);
-
-            await _moviesRepository.SaveChangesAsync();
+            this.moviesRepository.UpdateMovie(movieEntity);
+            await this.moviesRepository.SaveChangesAsync();
 
             // return the updated movie, after mapping it
-            return Ok(_mapper.Map<Models.Movie>(movieEntity));
+            return Ok(this.mapper.Map<Models.Movie>(movieEntity));
         }
 
+        /// <summary>
+        /// The PartiallyUpdateMovie
+        /// </summary>
+        /// <param name="movieId">The movieId<see cref="Guid"/></param>
+        /// <param name="patchDoc">The patchDoc<see cref="JsonPatchDocument{Models.MovieForUpdate}"/></param>
+        /// <returns>The <see cref="Task{IActionResult}"/></returns>
         [HttpPatch("{movieId}")]
-        public async Task<IActionResult> PartiallyUpdateMovie(Guid movieId, 
-            [FromBody] JsonPatchDocument<Models.MovieForUpdate> patchDoc)
+        public async Task<IActionResult> PartiallyUpdateMovie(Guid movieId, [FromBody] JsonPatchDocument<Models.MovieForUpdate> patchDoc)
         {
-            var movieEntity = await _moviesRepository.GetMovieAsync(movieId);
+            Movie movieEntity = await this.moviesRepository.GetMovieAsync(movieId);
+
             if (movieEntity == null)
-            {
                 return NotFound();
-            }
 
             // the patch is on a DTO, not on the movie entity
-            var movieToPatch = Mapper.Map<Models.MovieForUpdate>(movieEntity);
+            Models.MovieForUpdate movieToPatch = Mapper.Map<Models.MovieForUpdate>(movieEntity);
 
             patchDoc.ApplyTo(movieToPatch, ModelState);
-              
+
             if (!ModelState.IsValid)
-            {
                 return new UnprocessableEntityObjectResult(ModelState);
-            }
 
             // map back to the entity, and save
             Mapper.Map(movieToPatch, movieEntity);
 
-            // call into UpdateMovie even though in our implementation 
+            // call into UpdateMovie even though in our implementation
             // this doesn't contain code - doing this ensures the code stays
-            // reliable when other repository implemenations (eg: a mock 
-            // repository) are used.
-            _moviesRepository.UpdateMovie(movieEntity);
-
-            await _moviesRepository.SaveChangesAsync();
+            // reliable when other repository implementations (eg: a mock repository) are used.
+            this.moviesRepository.UpdateMovie(movieEntity);
+            await this.moviesRepository.SaveChangesAsync();
 
             // return the updated movie, after mapping it
-            return Ok(_mapper.Map<Models.Movie>(movieEntity));
+            return Ok(mapper.Map<Models.Movie>(movieEntity));
         }
 
+        /// <summary>
+        /// The DeleteMovie
+        /// </summary>
+        /// <param name="movieId">The movieId<see cref="Guid"/></param>
+        /// <returns>The <see cref="Task{IActionResult}"/></returns>
         [HttpDelete("{movieid}")]
         public async Task<IActionResult> DeleteMovie(Guid movieId)
         {
-            var movieEntity = await _moviesRepository.GetMovieAsync(movieId);
-            if (movieEntity == null)
-            {
-                return NotFound();
-            }
+            Movie movieEntity = await this.moviesRepository.GetMovieAsync(movieId);
 
-            _moviesRepository.DeleteMovie(movieEntity);
-            await _moviesRepository.SaveChangesAsync();
+            if (movieEntity == null)
+                return NotFound();
+
+            this.moviesRepository.DeleteMovie(movieEntity);
+            await this.moviesRepository.SaveChangesAsync();
 
             return NoContent();
         }

@@ -1,22 +1,24 @@
-﻿using AutoMapper;
-using System.Collections.Generic;
-
-namespace Movies.API
+﻿namespace Movies.API
 {
+    using AutoMapper;
+
     /// <summary>
     /// AutoMapper profile for working with Movie objects
     /// </summary>
     public class MoviesProfile : Profile
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MoviesProfile"/> class.
+        /// </summary>
         public MoviesProfile()
         {
-            CreateMap<Entities.Movie, Models.Movie>()
+            this.CreateMap<Entities.Movie, Models.Movie>()
                 .ForMember(dest => dest.Director, opt => opt.MapFrom(src =>
                    $"{src.Director.FirstName} {src.Director.LastName}"));
 
-            CreateMap<Models.MovieForCreation, Entities.Movie>();
+            this.CreateMap<Models.MovieForCreation, Entities.Movie>();
 
-            CreateMap<Models.MovieForUpdate, Entities.Movie>().ReverseMap(); 
+            this.CreateMap<Models.MovieForUpdate, Entities.Movie>().ReverseMap();
         }
     }
 }

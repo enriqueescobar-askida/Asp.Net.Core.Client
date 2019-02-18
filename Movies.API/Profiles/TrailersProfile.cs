@@ -1,16 +1,19 @@
-﻿using AutoMapper;
-
-namespace Movies.API.Profiles
+﻿namespace Movies.API.Profiles
 {
+    using AutoMapper;
+
     /// <summary>
     /// AutoMapper profile for working with Trailer objects
     /// </summary>
     public class TrailersProfile : Profile
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TrailersProfile"/> class.
+        /// </summary>
         public TrailersProfile()
         {
-            CreateMap<InternalModels.Trailer, Models.Trailer>();
-            CreateMap<Models.TrailerForCreation, InternalModels.Trailer>();
+            this.CreateMap<InternalModels.Trailer, Models.Trailer>();
+            this.CreateMap<Models.TrailerForCreation, InternalModels.Trailer>();
         }
     }
 }
