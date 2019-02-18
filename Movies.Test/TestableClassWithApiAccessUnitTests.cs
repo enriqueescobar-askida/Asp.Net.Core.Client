@@ -1,23 +1,21 @@
-using Moq;
-using Moq.Protected;
-using Movies.Client;
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-
 namespace Movies.Test
 {
+    using Moq;
+    using Moq.Protected;
+    using Movies.Client;
+    using System.Net;
+    using System.Net.Http;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Xunit;
+
     public class TestableClassWithApiAccessUnitTests
     {
         [Fact]
         public void GetMovie_On401Response_MustThrowUnauthorizedApiAccessException()
         {
-            var httpClient = new HttpClient(new Return401UnauthorizedResponseHandler());
-            var testableClass = new TestableClassWithApiAccess(httpClient);
-
+            HttpClient httpClient = new HttpClient(new Return401UnauthorizedResponseHandler());
+            TestableClassWithApiAccess testableClass = new TestableClassWithApiAccess(httpClient);
             var cancellationTokenSource = new CancellationTokenSource();
 
             Assert.ThrowsAsync<UnauthorizedApiAccessException>(
@@ -27,7 +25,7 @@ namespace Movies.Test
         [Fact]
         public void GetMovie_On401Response_MustThrowUnauthorizedApiAccessException_WithMoq()
         {
-            var unauthorizedResponseHttpMessageHandlerMock = new Mock<HttpMessageHandler>();
+            Mock<HttpMessageHandler> unauthorizedResponseHttpMessageHandlerMock = new Mock<HttpMessageHandler>();
 
             unauthorizedResponseHttpMessageHandlerMock.Protected()
                  .Setup<Task<HttpResponseMessage>>(
@@ -39,10 +37,8 @@ namespace Movies.Test
                    StatusCode = HttpStatusCode.Unauthorized
                });
 
-            var httpClient = new HttpClient(unauthorizedResponseHttpMessageHandlerMock.Object);
-
-            var testableClass = new TestableClassWithApiAccess(httpClient);
-
+            HttpClient httpClient = new HttpClient(unauthorizedResponseHttpMessageHandlerMock.Object);
+            TestableClassWithApiAccess testableClass = new TestableClassWithApiAccess(httpClient);
             var cancellationTokenSource = new CancellationTokenSource();
 
             Assert.ThrowsAsync<UnauthorizedApiAccessException>(
